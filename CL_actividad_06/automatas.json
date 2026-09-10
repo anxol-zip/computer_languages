@@ -1,7 +1,7 @@
 {
   "ejercicio_1_afd": {
     "nombre": "AFD del Reporte 1 (Σ = {a, b, c, d, e}, 10 estados)",
-    "descripcion": "AFD completo trabajado en JFLAP para el Reporte 1. q9 es el estado trampa (absorbente y no final): cualquier cadena que contenga el simbolo 'e' es rechazada.",
+    "descripcion": "AFD del Reporte 1, capturado en JFLAP. Es un AFD completo: hay exactamente una transicion por cada par (estado, simbolo). q9 es el estado trampa (absorbente y no final), asi que toda cadena que contenga 'e' se rechaza. Las 15 cadenas son las que se verificaron a mano en el reporte.",
     "estado_inicial": "q0",
     "estados_finales": ["q2", "q4", "q6", "q7", "q8"],
     "tabla_transicion": {
@@ -21,8 +21,8 @@
   },
 
   "ejercicio_2_afn": {
-    "nombre": "AFN de la Actividad 5 (Σ = {a, b, c})",
-    "descripcion": "AFN que reconoce el lenguaje L = {w ∈ {a,b,c}* : w termina en 'abc' o en 'acb'}. El no determinismo esta en q0, donde el simbolo 'a' lleva a {q0, q1}.",
+    "nombre": "AFN de la Actividad 5 (Σ = {a, b, c}, 6 estados)",
+    "descripcion": "AFN de la Actividad 5. El no determinismo esta en q0: al leer 'a' el automata se queda en q0 y ademas pasa a q1, o sea Δ(q0, a) = {q0, q1}. Hay celdas vacias (Φ), algo imposible en un AFD completo. Las 9 cadenas son las que se trazaron a mano en la actividad.",
     "estado_inicial": "q0",
     "estados_finales": ["q4", "q5"],
     "tabla_transicion": {
@@ -33,20 +33,6 @@
       "q4": {},
       "q5": {}
     },
-    "cadenas": ["abc", "acb", "aabc", "bcacb", "abcb", "cba", "", "a",
-                "abcabc", "ccacb", "ab"]
-  },
-
-  "ejercicio_3_afn_lambda": {
-    "nombre": "AFN-λ que reconoce a*b*c* (Σ = {a, b, c})",
-    "descripcion": "AFN con transiciones lambda: las llaves \"λ\" permiten cambiar de bloque sin consumir simbolos, por lo que se ejercita la cerradura-λ del evaluador.",
-    "estado_inicial": "q0",
-    "estados_finales": ["q2"],
-    "tabla_transicion": {
-      "q0": {"a": ["q0"], "λ": ["q1"]},
-      "q1": {"b": ["q1"], "λ": ["q2"]},
-      "q2": {"c": ["q2"]}
-    },
-    "cadenas": ["", "abc", "aabbcc", "ac", "b", "ccc", "ba", "cba", "aaa"]
+    "cadenas": ["abc", "acb", "ab", "ac", "cbaacb", "bbabc", "abca", "abcb", "accb"]
   }
 }
