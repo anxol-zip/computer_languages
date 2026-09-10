@@ -1,0 +1,52 @@
+{
+  "ejercicio_1_afd": {
+    "nombre": "AFD del Reporte 1 (Σ = {a, b, c, d, e}, 10 estados)",
+    "descripcion": "AFD completo trabajado en JFLAP para el Reporte 1. q9 es el estado trampa (absorbente y no final): cualquier cadena que contenga el simbolo 'e' es rechazada.",
+    "estado_inicial": "q0",
+    "estados_finales": ["q2", "q4", "q6", "q7", "q8"],
+    "tabla_transicion": {
+      "q0": {"a": "q1", "b": "q2", "c": "q3", "d": "q5", "e": "q9"},
+      "q1": {"a": "q1", "b": "q2", "c": "q4", "d": "q5", "e": "q9"},
+      "q2": {"a": "q4", "b": "q2", "c": "q6", "d": "q5", "e": "q9"},
+      "q3": {"a": "q1", "b": "q6", "c": "q3", "d": "q7", "e": "q9"},
+      "q4": {"a": "q4", "b": "q2", "c": "q7", "d": "q8", "e": "q9"},
+      "q5": {"a": "q6", "b": "q2", "c": "q3", "d": "q5", "e": "q9"},
+      "q6": {"a": "q6", "b": "q7", "c": "q8", "d": "q5", "e": "q9"},
+      "q7": {"a": "q4", "b": "q7", "c": "q8", "d": "q7", "e": "q9"},
+      "q8": {"a": "q6", "b": "q2", "c": "q8", "d": "q8", "e": "q9"},
+      "q9": {"a": "q9", "b": "q9", "c": "q9", "d": "q9", "e": "q9"}
+    },
+    "cadenas": ["aaaab", "cac", "b", "abccc", "ab", "aac", "cccc", "e",
+                "aaccc", "bbc", "d", "cdddd", "ad", "bbd", "bbbbb"]
+  },
+
+  "ejercicio_2_afn": {
+    "nombre": "AFN de la Actividad 5 (Σ = {a, b, c})",
+    "descripcion": "AFN que reconoce el lenguaje L = {w ∈ {a,b,c}* : w termina en 'abc' o en 'acb'}. El no determinismo esta en q0, donde el simbolo 'a' lleva a {q0, q1}.",
+    "estado_inicial": "q0",
+    "estados_finales": ["q4", "q5"],
+    "tabla_transicion": {
+      "q0": {"a": ["q0", "q1"], "b": ["q0"], "c": ["q0"]},
+      "q1": {"b": ["q2"], "c": ["q3"]},
+      "q2": {"c": ["q4"]},
+      "q3": {"b": ["q5"]},
+      "q4": {},
+      "q5": {}
+    },
+    "cadenas": ["abc", "acb", "aabc", "bcacb", "abcb", "cba", "", "a",
+                "abcabc", "ccacb", "ab"]
+  },
+
+  "ejercicio_3_afn_lambda": {
+    "nombre": "AFN-λ que reconoce a*b*c* (Σ = {a, b, c})",
+    "descripcion": "AFN con transiciones lambda: las llaves \"λ\" permiten cambiar de bloque sin consumir simbolos, por lo que se ejercita la cerradura-λ del evaluador.",
+    "estado_inicial": "q0",
+    "estados_finales": ["q2"],
+    "tabla_transicion": {
+      "q0": {"a": ["q0"], "λ": ["q1"]},
+      "q1": {"b": ["q1"], "λ": ["q2"]},
+      "q2": {"c": ["q2"]}
+    },
+    "cadenas": ["", "abc", "aabbcc", "ac", "b", "ccc", "ba", "cba", "aaa"]
+  }
+}

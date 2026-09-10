@@ -1,0 +1,15 @@
+aaaab;
+cac;
+b;
+abccc;
+ab;
+aac;
+cccc;
+e;
+aaccc;
+bbc;
+d;
+cdddd;
+ad;
+bbd;
+bbbbb
