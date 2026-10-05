@@ -1,0 +1,13 @@
+Algoritmo,Tamaño del conjunto,Con/Sin repetición,Tiempo total de ejecución (s),Memoria máxima (KB)
+Inserción,"1,000",Sin repetición,0.0080,0.75
+Inserción,"1,000",Con repetición,0.0080,0.75
+Inserción,"100,000",Sin repetición,95.8020,no medido
+Inserción,"100,000",Con repetición,119.3842,no medido
+Inserción,"1,000,000",Sin repetición,"9,580.1969 *ESTIMADO*",no medido
+Inserción,"1,000,000",Con repetición,"11,938.4163 *ESTIMADO*",no medido
+Mezcla,"1,000",Sin repetición,0.0007,17.99
+Mezcla,"1,000",Con repetición,0.0008,17.99
+Mezcla,"100,000",Sin repetición,0.1206,"1,688.70"
+Mezcla,"100,000",Con repetición,0.1183,"1,688.44"
+Mezcla,"1,000,000",Sin repetición,1.5792,"16,393.62"
+Mezcla,"1,000,000",Con repetición,1.5851,"16,393.73"
