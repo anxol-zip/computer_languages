@@ -1,0 +1,24 @@
+[project]
+name = "cl-actividad-11"
+version = "0.1.0"
+description = "Actividad 11 - Analizador de automatas (AFD/AFN) y de complejidad Big-O / Big-Omega"
+readme = "README.md"
+authors = [
+    { name = "Angel Rugerio", email = "201720@iberopuebla.mx" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi[standard]>=0.115",
+    "httpx>=0.28",
+    "jupyter>=1.0",
+]
+
+[project.scripts]
+cl-actividad-11 = "cl_actividad_11:main"
+
+[build-system]
+requires = ["uv_build>=0.12.21,<0.13.0"]
+build-backend = "uv_build"
+
+[tool.fastapi]
+entrypoint = "cl_actividad_11.main:app"
