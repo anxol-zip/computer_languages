@@ -36,17 +36,58 @@ Los endpoints de la Actividad 6 (`/afd/evaluar` y `/afn/evaluar`) siguen funcion
 | `/complejidad/peor-caso` | POST | **Actividad 11** |
 | `/complejidad/mejor-caso` | POST | **Actividad 11** |
 
+## Estructura del proyecto
+
+```
+CL_actividad_11/
+├── main.py                  # punto de entrada: crea la app y conecta los endpoints
+├── src/
+│   ├── automatas/           # Actividad 6, reutilizada tal cual
+│   │   └── __init__.py      #   modelos AFD/AFN, evaluadores y POST /afd, /afn
+│   └── complejidad/         # Actividad 11, un módulo por etapa del análisis
+│       ├── __init__.py      #   analizar(): conecta las 4 etapas
+│       ├── notacion.py      #   representación de una complejidad: O(n^2), 2n + 4
+│       ├── escaner.py       #   etapa 1: líneas físicas -> líneas lógicas
+│       ├── arbol.py         #   etapa 2: líneas lógicas -> árbol de bloques
+│       ├── analizador.py    #   etapa 3: reglas Big-O / Big-Omega sobre el árbol
+│       ├── reporte.py       #   etapa 4: comentarios y bloque de resumen
+│       └── rutas.py         #   POST /complejidad/peor-caso, /mejor-caso
+├── ejercicios/              # programas de prueba y lo que regresó la API
+├── generar_salidas.py
+├── pyproject.toml
+└── uv.lock
+```
+
+### De la Actividad 6 a la Actividad 11
+
+El proyecto empezó como una copia de la Actividad 6 y se reorganizó en tres pasos:
+
+1. **De `pip` a `uv`.** El `requirements.txt` se reemplazó por [`pyproject.toml`](./pyproject.toml)
+   (dependencias declaradas) y `uv.lock` (versiones exactas, para que `uv sync` instale siempre lo
+   mismo). Se quitó `jupyter`, que en la Actividad 6 servía para el notebook y aquí no se usa.
+2. **Un módulo por actividad.** En la Actividad 6 todo vivía en un solo `main.py` con la app de
+   FastAPI. Ahora cada actividad es un paquete independiente dentro de `src/` que expone sus
+   endpoints en un `APIRouter`, y [`main.py`](./main.py) solo crea la app y los conecta con
+   `app.include_router(...)`. Así se ve qué se agregó en la Actividad 11 sin tocar lo de la 6:
+   [`src/automatas/`](./src/automatas/__init__.py) es el mismo código de la Actividad 6, solo
+   cambió `@app.post` por `@router.post`.
+3. **La Actividad 11 separada por etapas.** El analizador de complejidad es un *pipeline*: cada
+   etapa recibe lo que produjo la anterior. Cada etapa quedó en su propio archivo, y
+   [`complejidad/__init__.py`](./src/complejidad/__init__.py) las encadena en la función
+   `analizar()`, así que se lee de arriba abajo en el mismo orden en que se ejecuta.
+
+La reorganización no cambió ningún resultado: después de cada paso se regeneraron las salidas de
+[`ejercicios/salidas/`](./ejercicios/salidas/) y quedaron idénticas, byte por byte.
+
 ## Cómo correr el servicio
 
-El proyecto usa [uv](https://docs.astral.sh/uv/) (en la Actividad 6 era `pip` + `requirements.txt`;
-las dependencias ahora viven en [`pyproject.toml`](./pyproject.toml) y las versiones exactas en
-`uv.lock`).
+El proyecto usa [uv](https://docs.astral.sh/uv/).
 
 ```bash
 uv sync                 # crea .venv e instala las dependencias de uv.lock
 uv run fastapi dev      # modo desarrollo, se recarga solo al guardar
 # o bien
-uv run cl-actividad-11  # el comando que define [project.scripts]
+uv run main.py          # lo mismo, sin recarga automática
 ```
 
 Las dos formas levantan el servicio en `http://127.0.0.1:8000`. La documentación interactiva
@@ -154,21 +195,27 @@ fuera de funciones (*nivel principal*), y una última sección **Programa comple
 
 # Cómo se calcula la complejidad
 
-El análisis está en [`src/cl_actividad_11/complejidad.py`](./src/cl_actividad_11/complejidad.py) y
-tiene cuatro pasos:
+El análisis está en [`src/complejidad/`](./src/complejidad/) y tiene cuatro pasos, uno por
+archivo:
 
-1. **Escáner.** Lee el archivo carácter por carácter con un pequeño autómata que distingue tres
+```
+código --escaner--> líneas lógicas --arbol--> árbol de bloques
+       --analizador--> árbol con complejidades --reporte--> archivo anotado
+```
+
+1. **Escáner** ([`escaner.py`](./src/complejidad/escaner.py)). Lee el archivo carácter por carácter con un pequeño autómata que distingue tres
    estados: código, cadena de texto y comentario. Así se quitan los comentarios y el contenido de
    las cadenas (un `print("for i in range(n)")` **no** es un ciclo) y se juntan en una sola
    *línea lógica* las instrucciones que ocupan varias líneas (paréntesis abiertos, cadenas
    triples, `\` al final).
-2. **Árbol de bloques.** Con la sangría de cada línea lógica se arma un árbol: el cuerpo de un
-   `for`, `while`, `if` o `def` son sus hijos.
-3. **Reglas de complejidad.** Se recorre el árbol aplicando las reglas de abajo. Cada complejidad
-   se guarda como $(2^n)^e \cdot n^k \cdot (\log n)^j$, de modo que multiplicar es sumar
-   exponentes y comparar el orden de crecimiento es comparar $(e, k, j)$.
-4. **Archivo de salida.** Se escribe el comentario en la última línea física de cada instrucción
-   y se agrega el bloque de resumen.
+2. **Árbol de bloques** ([`arbol.py`](./src/complejidad/arbol.py)). Con la sangría de cada línea
+   lógica se arma un árbol: el cuerpo de un `for`, `while`, `if` o `def` son sus hijos.
+3. **Reglas de complejidad** ([`analizador.py`](./src/complejidad/analizador.py)). Se recorre el
+   árbol aplicando las reglas de abajo. Cada complejidad se guarda como
+   $(2^n)^e \cdot n^k \cdot (\log n)^j$ ([`notacion.py`](./src/complejidad/notacion.py)), de modo
+   que multiplicar es sumar exponentes y comparar el orden de crecimiento es comparar $(e, k, j)$.
+4. **Archivo de salida** ([`reporte.py`](./src/complejidad/reporte.py)). Se escribe el comentario
+   en la última línea física de cada instrucción y se agrega el bloque de resumen.
 
 ## Reglas del peor caso (Big-O)
 
@@ -509,9 +556,15 @@ programa. Por eso:
 
 | Archivo | Contenido |
 |---|---|
-| [`src/cl_actividad_11/main.py`](./src/cl_actividad_11/main.py) | Servicio FastAPI: endpoints de la Actividad 6 y los dos nuevos de complejidad |
-| [`src/cl_actividad_11/complejidad.py`](./src/cl_actividad_11/complejidad.py) | Analizador de complejidad (escáner, árbol, reglas y archivo de salida) |
-| [`src/cl_actividad_11/__init__.py`](./src/cl_actividad_11/__init__.py) | Comando `cl-actividad-11` que levanta el servidor |
+| [`main.py`](./main.py) | Punto de entrada: crea la app de FastAPI y conecta los endpoints de los dos módulos |
+| [`src/automatas/`](./src/automatas/__init__.py) | Actividad 6: evaluador de cadenas para AFD y AFN (`/afd/evaluar`, `/afn/evaluar`) |
+| [`src/complejidad/__init__.py`](./src/complejidad/__init__.py) | Función `analizar()`: encadena las cuatro etapas |
+| [`src/complejidad/notacion.py`](./src/complejidad/notacion.py) | Representación de una complejidad y cómo escribirla |
+| [`src/complejidad/escaner.py`](./src/complejidad/escaner.py) | Etapa 1: escáner de líneas lógicas |
+| [`src/complejidad/arbol.py`](./src/complejidad/arbol.py) | Etapa 2: árbol de bloques por sangría |
+| [`src/complejidad/analizador.py`](./src/complejidad/analizador.py) | Etapa 3: reglas de peor y mejor caso |
+| [`src/complejidad/reporte.py`](./src/complejidad/reporte.py) | Etapa 4: comentarios línea por línea y bloque de resumen |
+| [`src/complejidad/rutas.py`](./src/complejidad/rutas.py) | Endpoints `/complejidad/peor-caso` y `/complejidad/mejor-caso` |
 | [`ejercicios/`](./ejercicios/) | Los cuatro ejercicios de la presentación |
 | [`ejercicios/salidas/`](./ejercicios/salidas/) | Los archivos que regresaron los endpoints para cada ejercicio |
 | [`generar_salidas.py`](./generar_salidas.py) | Manda cada ejercicio a los dos endpoints y guarda las respuestas |

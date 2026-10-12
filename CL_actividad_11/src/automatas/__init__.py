@@ -1,29 +1,17 @@
-# Actividad 11 - Lenguajes de Computacion
+# Actividad 6 - Lenguajes de Computacion (reutilizada en la Actividad 11)
 # Angel Rugerio Jimenez  #201720
+# Axel Garcia Arellano   #201251
 #
-# Escala el servicio de la Actividad 6 (evaluador de cadenas para AFD y AFN) con dos
-# endpoints nuevos que analizan la complejidad de un programa en Python linea por linea:
-#   - POST /complejidad/peor-caso   -> Big-O
-#   - POST /complejidad/mejor-caso  -> Big-Omega
-# La logica del analisis vive en complejidad.py; aqui solo estan los endpoints.
+# Evaluador de cadenas para un AFD y un AFN. Es el codigo de la Actividad 6 sin cambios
+# en la logica: lo unico nuevo es que los endpoints cuelgan de un APIRouter en lugar de
+# la app, para que main.py los pueda juntar con los de la Actividad 11.
 
-from pathlib import PurePath
 from typing import Dict, List, Union
 
-from fastapi import FastAPI, File, HTTPException, UploadFile
-from fastapi.responses import Response
+from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel, Field
 
-from cl_actividad_11.complejidad import analizar
-
-app = FastAPI(
-    title="Actividad 11 - Analizador de Complejidad",
-    description="Servicio web que evalua cadenas sobre automatas finitos deterministas (AFD) "
-                "y no deterministas (AFN, con transiciones vacias), y que analiza la "
-                "complejidad de un programa en Python en el peor caso (Big-O) y en el "
-                "mejor caso (Big-Omega).",
-    version="2.0.0",
-)
+router = APIRouter(tags=["Automatas (Actividad 6)"])
 
 EPSILON = "ε"
 
@@ -171,7 +159,7 @@ def evaluar_cadena_afd(automata: AFD, cadena: str) -> dict:
     }
 
 
-@app.post("/afd/evaluar", summary="Evalua cadenas sobre un AFD")
+@router.post("/afd/evaluar", summary="Evalua cadenas sobre un AFD")
 def evaluar_afd(automata: AFD):
     estados, alfabeto = describir(automata.tabla_transicion)
     validar(estados, automata.estado_inicial, automata.estados_finales)
@@ -300,7 +288,7 @@ def evaluar_cadena_afn(automata: AFN, cadena: str) -> dict:
     }
 
 
-@app.post("/afn/evaluar", summary="Evalua cadenas sobre un AFN (admite transiciones ε)")
+@router.post("/afn/evaluar", summary="Evalua cadenas sobre un AFN (admite transiciones ε)")
 def evaluar_afn(automata: AFN):
     estados, alfabeto = describir(automata.tabla_transicion)
     validar(estados, automata.estado_inicial, automata.estados_finales)
@@ -329,79 +317,4 @@ def evaluar_afn(automata: AFN):
             "aceptadas": [r["cadena"] for r in resultados if r["aceptada"]],
             "rechazadas": [r["cadena"] for r in resultados if not r["aceptada"]],
         },
-    }
-
-
-# ---------------------------------------------------------------------------
-# Analizador de complejidad (Actividad 11)
-# ---------------------------------------------------------------------------
-
-async def leer_programa(archivo: UploadFile) -> str:
-    """Lee el archivo subido y comprueba que sea un programa de Python valido."""
-    contenido = await archivo.read()
-    try:
-        codigo = contenido.decode("utf-8")
-    except UnicodeDecodeError:
-        raise HTTPException(status_code=400, detail="El archivo debe ser texto en UTF-8.")
-
-    if not codigo.strip():
-        raise HTTPException(status_code=400, detail="El archivo esta vacio.")
-
-    # El analisis es linea por linea y se apoya en la sangria, asi que primero se
-    # confirma que el programa sea Python sintacticamente correcto.
-    try:
-        compile(codigo, archivo.filename or "programa.py", "exec")
-    except SyntaxError as error:
-        raise HTTPException(
-            status_code=400,
-            detail=f"El archivo no es un programa de Python valido (linea {error.lineno}): {error.msg}",
-        )
-    return codigo
-
-
-def archivo_anotado(codigo: str, nombre: str, modo: str, sufijo: str) -> Response:
-    """Regresa el programa anotado como archivo descargable."""
-    anotado, _ = analizar(codigo, modo)
-    base = PurePath(nombre or "programa.py").stem
-    if not base.isascii():
-        base = "programa"   # el encabezado HTTP solo admite ASCII
-    return Response(
-        content=anotado,
-        media_type="text/x-python; charset=utf-8",
-        headers={"Content-Disposition": f'attachment; filename="{base}_{sufijo}.py"'},
-    )
-
-
-@app.post("/complejidad/peor-caso", summary="Complejidad en el peor caso (Big-O)")
-async def complejidad_peor_caso(archivo: UploadFile = File(..., description="Programa en Python (.py)")):
-    """Regresa el mismo programa con la complejidad Big-O de cada linea como comentario
-    y un bloque final con la suma de las complejidades y la de mayor grado."""
-    codigo = await leer_programa(archivo)
-    return archivo_anotado(codigo, archivo.filename, "peor", "big_o")
-
-
-@app.post("/complejidad/mejor-caso", summary="Complejidad en el mejor caso (Big-Omega)")
-async def complejidad_mejor_caso(archivo: UploadFile = File(..., description="Programa en Python (.py)")):
-    """Regresa el mismo programa con la complejidad Big-Omega de cada linea como comentario
-    y un bloque final con la suma de las complejidades y la de mayor grado."""
-    codigo = await leer_programa(archivo)
-    return archivo_anotado(codigo, archivo.filename, "mejor", "big_omega")
-
-
-# ---------------------------------------------------------------------------
-# Raiz: ayuda rapida del servicio
-# ---------------------------------------------------------------------------
-
-@app.get("/", summary="Informacion del servicio")
-def read_root():
-    return {
-        "actividad": "Actividad 11 - Analizador de Complejidad",
-        "autor": "Angel Rugerio Jimenez - 201720",
-        "endpoints": {
-            "POST /afd/evaluar": "Evalua cadenas sobre un AFD",
-            "POST /afn/evaluar": "Evalua cadenas sobre un AFN (con o sin transiciones ε)",
-            "POST /complejidad/peor-caso": "Anota un programa .py con su complejidad Big-O",
-            "POST /complejidad/mejor-caso": "Anota un programa .py con su complejidad Big-Omega",
-        },
-        "documentacion_interactiva": "/docs",
     }

@@ -12,12 +12,13 @@ dependencies = [
     "httpx>=0.28",
 ]
 
-[project.scripts]
-cl-actividad-11 = "cl_actividad_11:main"
-
 [build-system]
 requires = ["uv_build>=0.12.21,<0.13.0"]
 build-backend = "uv_build"
 
+# dos modulos independientes dentro de src/ (uno por actividad)
+[tool.uv.build-backend]
+module-name = ["automatas", "complejidad"]
+
 [tool.fastapi]
-entrypoint = "cl_actividad_11.main:app"
+entrypoint = "main:app"

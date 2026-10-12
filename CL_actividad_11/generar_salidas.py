@@ -11,7 +11,7 @@ from pathlib import Path
 
 from fastapi.testclient import TestClient
 
-from cl_actividad_11.main import app
+from main import app
 
 EJERCICIOS = Path(__file__).parent / "ejercicios"
 SALIDAS = EJERCICIOS / "salidas"
