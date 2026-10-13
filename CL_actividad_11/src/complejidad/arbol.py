@@ -16,11 +16,14 @@ PALABRAS_COMPUESTAS = {"def", "class", "for", "while", "if", "elif", "else",
 
 
 class Nodo:
-    def __init__(self, linea: LineaLogica, texto: str = None):
+    def __init__(self, linea: LineaLogica, texto: str | None = None):
         self.linea = linea
         self.texto = linea.texto if texto is None else texto
         self.tipo = clasificar(self.texto)
         self.hijos = []
+        # solo para los def (los llena el analizador)
+        self.nombre = None      # nombre de la funcion
+        self.recursion = ""     # explicacion del tipo de recursion, si la hay
         # resultados del analisis
         self.propio = None      # costo de UNA ejecucion de la linea
         self.veces = UNO        # cuantas veces se ejecuta

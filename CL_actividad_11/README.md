@@ -36,6 +36,23 @@ Los endpoints de la Actividad 6 (`/afd/evaluar` y `/afn/evaluar`) siguen funcion
 | `/complejidad/peor-caso` | POST | **Actividad 11** |
 | `/complejidad/mejor-caso` | POST | **Actividad 11** |
 
+## Desarrollo con ayuda de IA
+
+Esta actividad se hizo **con ayuda de IA**. El ejemplo del profesor (`analizador.ipynb`) le
+delega todo el análisis a un **LLM local** (Llama 3.2 a través de Ollama): le manda el código en
+un *prompt* y guarda lo que el modelo conteste. Aquí la IA se usó para **hardcodear el analista**:
+las reglas de notación asintótica vistas en clase quedaron escritas directamente en Python
+([`src/complejidad/`](./src/complejidad/)), así que el servicio no necesita ningún modelo de
+lenguaje para funcionar.
+
+| | LLM local (ejemplo del profesor) | Analista hardcodeado (esta actividad) |
+|---|---|---|
+| Requisitos | Ollama corriendo con el modelo descargado | Solo las dependencias de `uv.lock` |
+| Resultado | Puede cambiar entre una ejecución y otra | Siempre el mismo para el mismo archivo |
+| Formato de salida | El modelo a veces agrega texto o markdown, y el archivo deja de compilar | Solo agrega comentarios: el archivo sigue siendo Python válido |
+| Por qué da ese resultado | No se puede revisar | Cada regla está en el código y en este README |
+| Lenguajes | Cualquiera | Solo Python (ver [Limitaciones](#limitaciones)) |
+
 ## Estructura del proyecto
 
 ```
@@ -52,10 +69,12 @@ CL_actividad_11/
 │       ├── analizador.py    #   etapa 3: reglas Big-O / Big-Omega sobre el árbol
 │       ├── reporte.py       #   etapa 4: comentarios y bloque de resumen
 │       └── rutas.py         #   POST /complejidad/peor-caso, /mejor-caso
-├── ejercicios/              # programas de prueba y lo que regresó la API
-├── generar_salidas.py
-├── pyproject.toml
-└── uv.lock
+├── ejercicios/              # los 4 ejercicios de la presentación
+│   └── salidas/             #   lo que regresó la API para cada uno
+├── generar_salidas.py       # regenera ejercicios/salidas/ llamando a los endpoints
+├── pyproject.toml           # dependencias y configuración del proyecto (uv)
+├── uv.lock                  # versiones exactas de las dependencias
+└── .python-version          # versión de Python que usa uv (3.14)
 ```
 
 ### De la Actividad 6 a la Actividad 11
@@ -70,7 +89,8 @@ El proyecto empezó como una copia de la Actividad 6 y se reorganizó en tres pa
    endpoints en un `APIRouter`, y [`main.py`](./main.py) solo crea la app y los conecta con
    `app.include_router(...)`. Así se ve qué se agregó en la Actividad 11 sin tocar lo de la 6:
    [`src/automatas/`](./src/automatas/__init__.py) es el mismo código de la Actividad 6, solo
-   cambió `@app.post` por `@router.post`.
+   cambió `@app.post` por `@router.post` (la Actividad 6 se hizo en equipo con Axel García
+   Arellano, 201251).
 3. **La Actividad 11 separada por etapas.** El analizador de complejidad es un *pipeline*: cada
    etapa recibe lo que produjo la anterior. Cada etapa quedó en su propio archivo, y
    [`complejidad/__init__.py`](./src/complejidad/__init__.py) las encadena en la función
@@ -232,7 +252,7 @@ ciclo, una recursión o una llamada a otra función que no sea O(1)*.
 | `while` cuya variable se **multiplica o divide** | $O(\log n)$ vueltas | `while b < n: b *= 2`, `medio = (izq + der) // 2` |
 | Ciclo dentro de ciclo | se **multiplican** | `for i…: for j…` → $O(n^2)$ |
 | `if` / `elif` / `else` | se suman **todas** las ramas (cota superior) | |
-| Comprensión de listas | $O(n)$ por cada `for` | `[x * x for x in lista]` |
+| Comprensión de listas | $O(n)$ por cada `for` que dependa de $n$; $O(1)$ si es sobre `range(...)` con puros números | `[x * x for x in lista]` |
 | Funciones de Python que recorren la colección | $O(n)$ | `sum`, `max`, `min`, `list(...)`, `.index`, `.count`, `.insert`, rebanadas `lista[:m]` |
 | Ordenar | $O(n \log n)$ | `sorted(lista)`, `lista.sort()` |
 | Llamada a una función definida en el mismo archivo | lo que cueste esa función | `busquedaLineal(datos, x)` |
@@ -556,16 +576,17 @@ programa. Por eso:
 
 | Archivo | Contenido |
 |---|---|
-| [`main.py`](./main.py) | Punto de entrada: crea la app de FastAPI y conecta los endpoints de los dos módulos |
-| [`src/automatas/`](./src/automatas/__init__.py) | Actividad 6: evaluador de cadenas para AFD y AFN (`/afd/evaluar`, `/afn/evaluar`) |
-| [`src/complejidad/__init__.py`](./src/complejidad/__init__.py) | Función `analizar()`: encadena las cuatro etapas |
-| [`src/complejidad/notacion.py`](./src/complejidad/notacion.py) | Representación de una complejidad y cómo escribirla |
-| [`src/complejidad/escaner.py`](./src/complejidad/escaner.py) | Etapa 1: escáner de líneas lógicas |
-| [`src/complejidad/arbol.py`](./src/complejidad/arbol.py) | Etapa 2: árbol de bloques por sangría |
-| [`src/complejidad/analizador.py`](./src/complejidad/analizador.py) | Etapa 3: reglas de peor y mejor caso |
-| [`src/complejidad/reporte.py`](./src/complejidad/reporte.py) | Etapa 4: comentarios línea por línea y bloque de resumen |
-| [`src/complejidad/rutas.py`](./src/complejidad/rutas.py) | Endpoints `/complejidad/peor-caso` y `/complejidad/mejor-caso` |
-| [`ejercicios/`](./ejercicios/) | Los cuatro ejercicios de la presentación |
-| [`ejercicios/salidas/`](./ejercicios/salidas/) | Los archivos que regresaron los endpoints para cada ejercicio |
-| [`generar_salidas.py`](./generar_salidas.py) | Manda cada ejercicio a los dos endpoints y guarda las respuestas |
-| [`pyproject.toml`](./pyproject.toml), `uv.lock` | Dependencias del proyecto (uv) |
+| [`main.py`](./main.py) | Punto de entrada. Crea la app de FastAPI, le conecta el `router` de cada módulo con `app.include_router(...)` y define `GET /` con la lista de endpoints. No tiene lógica propia |
+| [`src/automatas/`](./src/automatas/__init__.py) | Actividad 6: modelos `AFD` y `AFN` (Pydantic), sus evaluadores y los endpoints `/afd/evaluar` y `/afn/evaluar` en un `APIRouter` |
+| [`src/complejidad/__init__.py`](./src/complejidad/__init__.py) | `analizar(codigo, modo)`: valida el modo (`"peor"` o `"mejor"`), encadena las cuatro etapas y regresa el programa anotado |
+| [`src/complejidad/notacion.py`](./src/complejidad/notacion.py) | Una complejidad como tupla `(e, k, j)` y las constantes `UNO`, `LOG_N`, `N`, `N_LOG_N`, `DOS_A_LA_N`. `multiplicar()` suma exponentes, `notacion()` escribe `O(n^2)` / `Ω(n^2)` y `polinomio()` agrupa la suma (`2n + 4`) |
+| [`src/complejidad/escaner.py`](./src/complejidad/escaner.py) | Etapa 1. `escanear()` es el autómata código / cadena / comentario que convierte las líneas físicas en `LineaLogica` (línea inicial y final, sangría y texto limpio) |
+| [`src/complejidad/arbol.py`](./src/complejidad/arbol.py) | Etapa 2. `construir_arbol()` arma el árbol de `Nodo` con una pila según la sangría, y `clasificar()` le pone tipo a cada línea (`for`, `if`, `return`, …). También tiene las consultas que comparten las etapas 3 y 4: `agrupar()` (cadenas `if`/`elif`/`else`), `recorrer()` y `contados()` |
+| [`src/complejidad/analizador.py`](./src/complejidad/analizador.py) | Etapa 3. La clase `Analizador` aplica las reglas: `costo_expresion()` (llamadas costosas como `sorted`, `sum`, rebanadas), `iteraciones()` (vueltas de un ciclo), `tipo_de_recursion()` y `analizar_condicional()` (todas las ramas en el peor caso, la más barata en el mejor) |
+| [`src/complejidad/reporte.py`](./src/complejidad/reporte.py) | Etapa 4. `anotar_lineas()` agrega el comentario al final de cada instrucción y `resumen_final()` arma el bloque de resumen por función, nivel principal y programa completo |
+| [`src/complejidad/rutas.py`](./src/complejidad/rutas.py) | Endpoints `/complejidad/peor-caso` y `/complejidad/mejor-caso`. `leer_programa()` valida el archivo (UTF-8, no vacío, Python válido) y `archivo_anotado()` regresa la respuesta como archivo descargable |
+| [`ejercicios/`](./ejercicios/) | Los cuatro ejercicios de la presentación, sin cambios |
+| [`ejercicios/salidas/`](./ejercicios/salidas/) | Los archivos que regresaron los endpoints para cada ejercicio (`<nombre>_big_o.py` y `<nombre>_big_omega.py`) |
+| [`generar_salidas.py`](./generar_salidas.py) | Manda cada ejercicio a los dos endpoints con el `TestClient` de FastAPI (sin levantar el servidor) y guarda las respuestas en `ejercicios/salidas/` |
+| [`pyproject.toml`](./pyproject.toml) | Dependencias (`fastapi[standard]`, `httpx`), los dos paquetes de `src/` (`automatas`, `complejidad`) y el `entrypoint` que usa `fastapi dev` |
+| `uv.lock`, `.python-version` | Versiones exactas de las dependencias y de Python (3.14), para que `uv sync` instale siempre lo mismo |

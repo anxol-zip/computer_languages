@@ -41,7 +41,7 @@ async def leer_programa(archivo: UploadFile) -> str:
 
 def archivo_anotado(codigo: str, nombre: str, modo: str, sufijo: str) -> Response:
     """Regresa el programa anotado como archivo descargable."""
-    anotado, _ = analizar(codigo, modo)
+    anotado = analizar(codigo, modo)
     base = PurePath(nombre or "programa.py").stem
     if not base.isascii():
         base = "programa"   # el encabezado HTTP solo admite ASCII

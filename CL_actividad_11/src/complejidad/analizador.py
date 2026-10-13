@@ -28,6 +28,9 @@ COSTOS_CONOCIDOS = [
     (re.compile(r"\[[^\[\]]*:[^\[\]]*\]"), N),
 ]
 
+# range(...) con puros numeros: da las mismas vueltas sin importar n, asi que es O(1).
+RANGO_FIJO = r"range\s*\(\s*-?\d+\s*(?:,\s*-?\d+\s*){0,2}\)"
+
 # Una variable que se divide o se multiplica en cada vuelta hace que el while sea O(log n).
 PATRON_LOGARITMICO = re.compile(
     r"//\s*2\b|/\s*2\b|>>\s*1\b|\*\s*2\b|\*=\s*[2-9]\b|//=|/=|>>=|<<="
@@ -65,10 +68,12 @@ class Analizador:
             if patron.search(texto):
                 costo = max(costo, c)
 
-        # comprension de listas: [x for x in lista] recorre la lista
-        anidadas = len(re.findall(r"\bfor\b", texto))
-        if anidadas:
-            costo = max(costo, (0, anidadas, 0))
+        # comprension de listas: cada for que recorre algo que depende de n multiplica
+        # por n, igual que un ciclo; los que van sobre un rango fijo no cuentan
+        ciclos = len(re.findall(r"\bfor\b", texto))
+        fijos = len(re.findall(rf"\bfor\s+[\w\s,()]+?\s+in\s+{RANGO_FIJO}", texto))
+        if ciclos > fijos:
+            costo = max(costo, (0, ciclos - fijos, 0))
 
         # llamada a otra funcion definida en el mismo archivo: cuesta lo que esa funcion
         for nombre in self.funciones:
@@ -101,12 +106,8 @@ class Analizador:
         texto = ciclo.texto
         if ciclo.tipo == "for":
             iterable = re.sub(r"^(?:async\s+)?for\s+.+?\s+in\s+", "", texto).rstrip(":").strip()
-            rango = re.fullmatch(r"range\s*\((.*)\)", iterable)
-            if rango:
-                argumentos = [a.strip() for a in rango.group(1).split(",")]
-                if all(re.fullmatch(r"-?\d+", a) for a in argumentos):
-                    return UNO, "rango de tamano fijo: no depende de n"
-                return N, ""
+            if re.fullmatch(RANGO_FIJO, iterable):
+                return UNO, "rango de tamano fijo: no depende de n"
             return N, ""
 
         # while
