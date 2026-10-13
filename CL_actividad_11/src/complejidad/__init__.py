@@ -18,8 +18,8 @@ from complejidad.notacion import SIMBOLOS, UNO
 from complejidad.reporte import anotar_lineas, resumen_final
 
 
-def analizar(codigo: str, modo: str) -> tuple:
-    """Regresa (programa anotado, resumen en diccionario). modo: "peor" o "mejor"."""
+def analizar(codigo: str, modo: str) -> str:
+    """Regresa el programa anotado con su complejidad. modo: "peor" o "mejor"."""
     if modo not in SIMBOLOS:
         raise ValueError(f"Modo desconocido: {modo}")
 
@@ -29,6 +29,6 @@ def analizar(codigo: str, modo: str) -> tuple:
     Analizador(raiz, modo).analizar_bloque(                     # etapa 3
         raiz.hijos, UNO, {"funcion": None, "recursion": None, "salida": False})
     salida = anotar_lineas(lineas, raiz)                        # etapa 4
-    bloque, resumen = resumen_final(raiz, modo)
+    bloque = resumen_final(raiz, modo)
 
-    return "\n".join(salida + bloque) + "\n", resumen
+    return "\n".join(salida + bloque) + "\n"

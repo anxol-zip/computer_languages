@@ -24,7 +24,7 @@ def envolver(sumandos: list, sangria: str, ancho: int = 76) -> list:
     return [f"#{sangria}{r}" for r in renglones]
 
 
-def bloque_de_resumen(unidad: str, nodos: list, modo: str, extra: str = "") -> tuple:
+def bloque_de_resumen(unidad: str, nodos: list, modo: str, extra: str = "") -> list:
     terminos = [n.acumulado for n in nodos]
     mayor = max(terminos, default=UNO)
     lineas = [f"# {unidad}"]
@@ -34,12 +34,7 @@ def bloque_de_resumen(unidad: str, nodos: list, modo: str, extra: str = "") -> t
     lineas += envolver([notacion(t, modo) for t in terminos] or ["(sin operaciones)"], "     ")
     lineas.append(f"#     = {polinomio(terminos)}")
     lineas.append(f"#   Complejidad de mayor grado: {notacion(mayor, modo)}")
-    resumen = {
-        "unidad": unidad,
-        "suma": polinomio(terminos),
-        "mayor_grado": notacion(mayor, modo),
-    }
-    return lineas, resumen
+    return lineas
 
 
 def anotar_lineas(lineas: list, raiz: Nodo) -> list:
@@ -62,36 +57,34 @@ def anotar_lineas(lineas: list, raiz: Nodo) -> list:
     return salida
 
 
-def resumen_final(raiz: Nodo, modo: str) -> tuple:
+def resumen_final(raiz: Nodo, modo: str) -> list:
     """Una seccion por funcion, otra para el nivel principal y el total del programa."""
     titulo = "PEOR CASO (Big-O)" if modo == "peor" else "MEJOR CASO (Big-Omega)"
     barra = "# " + "=" * 74
     division = "# " + "-" * 74
     bloque = ["", "", barra, f"# RESUMEN DE COMPLEJIDAD -- {titulo}", barra]
-    resumenes, todos = [], []
+    unidades, todos = 0, []
 
     funciones = [n for n in recorrer(raiz, entrar_a_funciones=True) if n.tipo == "def"]
     for funcion in funciones:
         nodos = sorted(contados(funcion), key=lambda n: n.linea.fin)
         todos += nodos
-        texto, resumen = bloque_de_resumen(f"Funcion {funcion.nombre}", nodos, modo,
-                                           funcion.recursion)
-        bloque += texto + [division]
-        resumenes.append(resumen)
+        bloque += bloque_de_resumen(f"Funcion {funcion.nombre}", nodos, modo,
+                                    funcion.recursion) + [division]
+        unidades += 1
 
     # contados() no entra a las funciones: esto es solo el codigo del nivel principal
     principal = sorted(contados(raiz), key=lambda n: n.linea.fin)
     if principal:
         todos += principal
-        texto, resumen = bloque_de_resumen("Nivel principal (fuera de funciones)", principal, modo)
-        bloque += texto + [division]
-        resumenes.append(resumen)
+        bloque += bloque_de_resumen("Nivel principal (fuera de funciones)", principal, modo)
+        bloque += [division]
+        unidades += 1
 
     todos.sort(key=lambda n: n.linea.fin)
-    texto, total = bloque_de_resumen("Programa completo", todos, modo)
-    if len(resumenes) > 1:
-        bloque += texto + [barra]
+    if unidades > 1:
+        bloque += bloque_de_resumen("Programa completo", todos, modo) + [barra]
     else:
         bloque[-1] = barra  # una sola unidad: su resumen ya es el del programa completo
 
-    return bloque, {"modo": modo, "unidades": resumenes, "programa": total}
+    return bloque
