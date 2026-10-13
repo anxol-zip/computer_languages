@@ -1,0 +1,39 @@
+{
+  "algoritmo": "Greedy Best-First Search",
+  "origen": "E",
+  "destino": "AX",
+  "heuristica": "saltos al destino x peso minimo",
+  "limite_nodos": 40,
+  "nodos_visitados": 7,
+  "solucion": true,
+  "ruta": [
+    "E",
+    "O",
+    "P",
+    "AC",
+    "AN",
+    "AU",
+    "AX"
+  ],
+  "costo": 187.0,
+  "orden_visita": [
+    "E",
+    "O",
+    "P",
+    "AC",
+    "AN",
+    "AU",
+    "AX"
+  ],
+  "T(n)": {
+    "cota": "O((V + E) log V)",
+    "V": 50,
+    "E": 56,
+    "operaciones": 14,
+    "tiempo_ms": 0.0094
+  },
+  "S(n)": {
+    "cota": "O(V)",
+    "max_nodos_en_memoria": 8
+  }
+}

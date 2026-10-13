@@ -1,0 +1,50 @@
+{
+  "algoritmo": "A*",
+  "origen": "A",
+  "destino": "Y",
+  "heuristica": "saltos al destino x peso minimo",
+  "limite_nodos": 20,
+  "nodos_visitados": 18,
+  "solucion": true,
+  "ruta": [
+    "A",
+    "D",
+    "F",
+    "K",
+    "R",
+    "U",
+    "Y"
+  ],
+  "costo": 115.0,
+  "orden_visita": [
+    "A",
+    "D",
+    "B",
+    "E",
+    "I",
+    "F",
+    "M",
+    "K",
+    "R",
+    "G",
+    "U",
+    "O",
+    "H",
+    "C",
+    "N",
+    "V",
+    "L",
+    "Y"
+  ],
+  "T(n)": {
+    "cota": "O((V + E) log V)",
+    "V": 25,
+    "E": 45,
+    "operaciones": 56,
+    "tiempo_ms": 0.0316
+  },
+  "S(n)": {
+    "cota": "O(V + E)",
+    "max_nodos_en_memoria": 23
+  }
+}

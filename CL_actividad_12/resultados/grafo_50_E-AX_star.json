@@ -1,0 +1,41 @@
+{
+  "algoritmo": "A*",
+  "origen": "E",
+  "destino": "AX",
+  "heuristica": "saltos al destino x peso minimo",
+  "limite_nodos": 40,
+  "nodos_visitados": 9,
+  "solucion": true,
+  "ruta": [
+    "E",
+    "O",
+    "P",
+    "AC",
+    "AN",
+    "AU",
+    "AX"
+  ],
+  "costo": 187.0,
+  "orden_visita": [
+    "E",
+    "O",
+    "P",
+    "L",
+    "U",
+    "AC",
+    "AN",
+    "AU",
+    "AX"
+  ],
+  "T(n)": {
+    "cota": "O((V + E) log V)",
+    "V": 50,
+    "E": 56,
+    "operaciones": 18,
+    "tiempo_ms": 0.0119
+  },
+  "S(n)": {
+    "cota": "O(V + E)",
+    "max_nodos_en_memoria": 10
+  }
+}

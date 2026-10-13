@@ -1,0 +1,31 @@
+{
+  "algoritmo": "Greedy Best-First Search",
+  "origen": "D",
+  "destino": "I",
+  "heuristica": "saltos al destino x peso minimo",
+  "limite_nodos": 8,
+  "nodos_visitados": 3,
+  "solucion": true,
+  "ruta": [
+    "D",
+    "F",
+    "I"
+  ],
+  "costo": 43.0,
+  "orden_visita": [
+    "D",
+    "F",
+    "I"
+  ],
+  "T(n)": {
+    "cota": "O((V + E) log V)",
+    "V": 10,
+    "E": 17,
+    "operaciones": 7,
+    "tiempo_ms": 0.008
+  },
+  "S(n)": {
+    "cota": "O(V)",
+    "max_nodos_en_memoria": 5
+  }
+}
