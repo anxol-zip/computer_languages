@@ -1,0 +1,29 @@
+[project]
+name = "cl-actividad-12"
+version = "0.1.0"
+description = "Actividad 12 - Automatas (A6), complejidad (A11) y busqueda informada Greedy / A* (A12)"
+readme = "README.md"
+authors = [
+    { name = "Angel Rugerio", email = "201720@iberopuebla.mx" }
+]
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi[standard]>=0.115",
+]
+
+[build-system]
+requires = ["uv_build>=0.12.21,<0.13.0"]
+build-backend = "uv_build"
+
+# tres modulos independientes dentro de src/ (uno por actividad)
+[tool.uv.build-backend]
+module-name = ["automatas", "complejidad", "busqueda"]
+
+[tool.fastapi]
+entrypoint = "main:app"
+
+# solo para medir_coordenadas.py; la API no lo usa
+[dependency-groups]
+dev = [
+    "pillow>=12.3.0",
+]
