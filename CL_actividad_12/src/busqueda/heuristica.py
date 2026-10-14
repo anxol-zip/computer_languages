@@ -5,9 +5,11 @@
 # La usan los dos algoritmos (greedy solo con h, A* con g + h).
 #
 # Hay dos formas de calcularla:
-#   1. Con coordenadas (x, y) de cada nodo -> distancia euclidiana al destino.
-#   2. Sin coordenadas (el caso de los grafos de la actividad, que solo traen pesos)
-#      -> h(n) = saltos(n, destino) * peso_minimo
+#   1. Con coordenadas (x, y) de cada nodo -> distancia euclidiana al destino,
+#      escalada por k para que quede en las mismas unidades que los pesos (o cruda,
+#      si se pide escalar_heuristica = false). Las coordenadas de los grafos de la
+#      actividad salen de las imagenes con medir_coordenadas.py.
+#   2. Sin coordenadas -> h(n) = saltos(n, destino) * peso_minimo
 #      donde saltos(n, destino) es el menor numero de aristas entre n y el destino,
 #      calculado con una BFS hacia atras desde el destino.
 
@@ -54,14 +56,47 @@ def heuristica_por_saltos(grafo, destino):
     return {nodo: saltos[nodo] * peso_minimo if nodo in saltos else INFINITO for nodo in grafo}
 
 
-def heuristica_euclidiana(coordenadas, destino):
-    """h(n) = distancia en linea recta de n al destino."""
-    xd, yd = coordenadas[destino]
-    return {nodo: math.sqrt((x - xd) ** 2 + (y - yd) ** 2) for nodo, (x, y) in coordenadas.items()}
+def factor_de_escala(grafo, coordenadas):
+    """k = min(peso(u, v) / distancia(u, v)) sobre todas las aristas del grafo.
+
+    Las coordenadas estan en pixeles y los pesos en otras unidades: una arista de peso
+    12 puede medir cientos de pixeles. k es el mayor factor con el que ninguna arista
+    queda "mas corta" que su distancia escalada: k * distancia(u, v) <= peso(u, v).
+    """
+    k = math.inf
+    for nodo, aristas in grafo.items():
+        for vecino, peso in aristas:
+            distancia = math.dist(coordenadas[nodo], coordenadas[vecino])
+            if distancia > 0:           # dos nodos en el mismo punto no limitan a k
+                k = min(k, peso / distancia)
+    return k if k != math.inf else 0
 
 
-def construir_heuristica(grafo, destino, coordenadas=None):
-    """Regresa (h, descripcion): la tabla h[nodo] y el nombre de la heuristica usada."""
+def heuristica_euclidiana(grafo, coordenadas, destino, escalar=True):
+    """h(n) = k * distancia en linea recta de n al destino.  Regresa (h, k).
+
+    Con k = factor_de_escala(...) es consistente: para una arista u -> v, por la
+    desigualdad del triangulo y porque k * distancia(u, v) <= c(u, v),
+        h(u) <= k * distancia(u, v) + h(v) <= c(u, v) + h(v)
+    y por lo tanto tambien admisible: A* regresa la ruta de menor costo.
+    Con escalar=False, h(n) es la distancia en pixeles tal cual (k = None): puede
+    sobreestimar el costo real y A* deja de garantizar el optimo.
+    """
+    k = factor_de_escala(grafo, coordenadas) if escalar else None
+    destino_xy = coordenadas[destino]
+    h = {}
+    for nodo in grafo:
+        distancia = math.dist(coordenadas[nodo], destino_xy)
+        h[nodo] = k * distancia if escalar else distancia
+    return h, k
+
+
+def construir_heuristica(grafo, destino, coordenadas=None, escalar=True):
+    """Regresa (h, descripcion, k): la tabla h[nodo], el nombre de la heuristica usada
+    y el factor de escala (None si no aplica)."""
     if coordenadas is not None:
-        return heuristica_euclidiana(coordenadas, destino), "distancia euclidiana"
-    return heuristica_por_saltos(grafo, destino), "saltos al destino x peso minimo"
+        h, k = heuristica_euclidiana(grafo, coordenadas, destino, escalar)
+        if escalar:
+            return h, f"distancia euclidiana x k (k = {k:.6g})", k
+        return h, "distancia euclidiana cruda (pixeles, sin escalar)", None
+    return heuristica_por_saltos(grafo, destino), "saltos al destino x peso minimo", None

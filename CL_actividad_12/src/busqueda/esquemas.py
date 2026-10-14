@@ -45,6 +45,11 @@ class SolicitudBusqueda(BaseModel):
         description="Opcional: posicion (x, y) de cada nodo. Si se manda, h(n) es la distancia "
                     "euclidiana al destino; si no, h(n) se calcula con saltos (ver README).",
     )
+    escalar_heuristica: bool = Field(
+        True,
+        description="Solo con coordenadas: multiplicar la distancia por k = min(peso / distancia) "
+                    "para que h sea admisible. Con false se usa la distancia cruda.",
+    )
 
     @model_validator(mode="after")
     def validar_grafo(self):
@@ -99,6 +104,7 @@ class ResultadoBusqueda(BaseModel):
     origen: str
     destino: str
     heuristica: str
+    factor_escala: Optional[float] = Field(..., description="k de la heuristica euclidiana escalada (null si no aplica)")
     limite_nodos: int
     nodos_visitados: int
     solucion: bool
