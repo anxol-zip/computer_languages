@@ -1,7 +1,7 @@
 [project]
-name = "cl-actividad-12"
+name = "cl-actividad-13"
 version = "0.1.0"
-description = "Actividad 12 - Automatas (A6), complejidad (A11) y busqueda informada Greedy / A* (A12)"
+description = "Actividad 13 - Automatas (A6), complejidad (A11), busqueda informada (A12) y algoritmos P, NP y con heuristica (A13)"
 readme = "README.md"
 authors = [
     { name = "Angel Rugerio", email = "201720@iberopuebla.mx" }
@@ -15,15 +15,10 @@ dependencies = [
 requires = ["uv_build>=0.12.21,<0.13.0"]
 build-backend = "uv_build"
 
-# tres modulos independientes dentro de src/ (uno por actividad)
+# cuatro modulos independientes dentro de src/ (uno por actividad)
 [tool.uv.build-backend]
-module-name = ["automatas", "complejidad", "busqueda"]
+module-name = ["automatas", "complejidad", "busqueda", "pnp"]
 
 [tool.fastapi]
 entrypoint = "main:app"
 
-# solo para medir_coordenadas.py; la API no lo usa
-[dependency-groups]
-dev = [
-    "pillow>=12.3.0",
-]

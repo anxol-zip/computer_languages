@@ -24,7 +24,7 @@ from busqueda.utilidades import costo_de_ruta
 
 router = APIRouter(prefix="/search", tags=["Busqueda informada (Actividad 12)"])
 
-# cuerpo de la solicitud, con las 27 pruebas de la actividad como ejemplos en /docs
+# cuerpo de la solicitud, con ejemplos precargados en /docs
 Solicitud = Annotated[SolicitudBusqueda, Body(openapi_examples=EJEMPLOS)]
 
 
