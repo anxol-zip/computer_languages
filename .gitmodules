@@ -1,0 +1,3 @@
+[submodule "CL_evaluacion_02"]
+	path = CL_evaluacion_02
+	url = git@github.com:anxol-zip/reto-integrador-cl.git
