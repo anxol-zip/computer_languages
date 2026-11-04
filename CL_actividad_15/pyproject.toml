@@ -1,0 +1,10 @@
+[project]
+name = "actividad-15"
+version = "0.1.0"
+description = "Actividad 15: corte de varillas con recursión, memoización y tabulación"
+requires-python = ">=3.12"
+dependencies = [
+    "ipykernel>=7.3.0",
+    "jupyter>=1.1.1",
+    "nbconvert>=7.17.1",
+]
