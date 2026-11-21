@@ -1,0 +1,13 @@
+[project]
+name = "actividad-17"
+version = "0.1.0"
+description = "Actividad 17: benchmark Las Vegas (Pollard rho) vs. Monte Carlo (Miller-Rabin)"
+requires-python = ">=3.12"
+dependencies = [
+    "ipykernel>=7.3.0",
+    "jupyter>=1.1.1",
+    "matplotlib>=3.10",
+    "nbconvert>=7.17.1",
+    "pandas>=2.3",
+    "tabulate>=0.9",
+]
